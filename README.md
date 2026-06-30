@@ -4,7 +4,7 @@
 > Built for the **CROO Agent Hackathon** on the [CROO Agent Protocol](https://cap.croo.network/) (Base).
 
 You ask one question. A single **orchestrator agent** then autonomously **hires and pays**
-three specialist agents — a **Researcher**, a **Writer**, and a **Verifier** — settling each job
+three specialist agents a **Researcher**, a **Writer**, and a **Verifier** settling each job
 through real on-chain escrow. A live dashboard shows the money moving between agents in real time.
 
 ---
@@ -12,7 +12,7 @@ through real on-chain escrow. A live dashboard shows the money moving between ag
 ## Why this is different
 
 Most agent demos are a single bot doing a single task. CROO exists so that agents can
-**transact with each other** — discover, negotiate, pay, deliver, and build reputation.
+**transact with each other** discover, negotiate, pay, deliver, and build reputation.
 Research Desk is built around exactly that idea: it's a small, working **agent-to-agent (A2A) economy**.
 
 ```
