@@ -144,7 +144,7 @@ export class CrooRail implements PaymentRail {
         this.phase(pending, 'deliver', e.order_id);
         this.credit(pending.to, pending.price);
         this.phase(pending, 'clear', e.order_id);
-        pending.resolve({ orderId: e.order_id, result: safeParse(delivery?.deliverableText) });
+        pending.resolve({ orderId: e.order_id, result: safeParse(delivery?.deliverableText), price: pending.price });
         this.cleanup(pending);
       } catch (err) {
         this.fail(pending, err);
@@ -208,6 +208,8 @@ export class CrooRail implements PaymentRail {
           deliverableText: JSON.stringify(result),
         });
         feed(orderId, 'deliver', price);
+        // Escrow from the customer clears to Atlas (its revenue for this order).
+        this.credit('orchestrator', price);
         feed(orderId, 'clear', price);
       } catch (err) {
         emit({ type: 'agent', agent: 'orchestrator', state: 'idle' });

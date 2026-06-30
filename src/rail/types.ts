@@ -12,6 +12,8 @@ export interface HireRequest {
 export interface HireResult {
   orderId: string;
   result: unknown;
+  /** The actual amount paid for this order (real on-chain price in `croo` mode). */
+  price: number;
 }
 
 /** A provider's work function: given an input, produce a deliverable. */

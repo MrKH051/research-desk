@@ -25,7 +25,7 @@ for (const [id, info] of Object.entries(AGENTS)) {
         <div class="agent-role">${info.role}</div>
       </div>
     </div>
-    <div class="agent-balance" data-balance>0 <span>tUSDC</span></div>
+    <div class="agent-balance" data-balance>0 <span>USDC</span></div>
     <div class="agent-state" data-state></div>`;
   agentsEl.appendChild(card);
   cards[id] = card;
@@ -33,7 +33,7 @@ for (const [id, info] of Object.entries(AGENTS)) {
 
 function setBalance(agent, balance) {
   const el = cards[agent]?.querySelector("[data-balance]");
-  if (el) el.innerHTML = `${balance} <span>tUSDC</span>`;
+  if (el) el.innerHTML = `${balance} <span>USDC</span>`;
 }
 
 function setState(agent, state) {
@@ -71,7 +71,7 @@ function addFeed(order) {
     <span>${fromName} → ${toName}</span>
     <span class="agent-role">(${capability})</span>
     ${tx}
-    <span class="tx-amount">${amount} tUSDC</span>`;
+    <span class="tx-amount">${amount} USDC</span>`;
   feedEl.prepend(li);
   while (feedEl.children.length > 60) feedEl.removeChild(feedEl.lastChild);
   if (phase === "clear") flashPaid(to);
@@ -99,7 +99,7 @@ function showReport(r) {
     .map((s, i) => `<li>[${i + 1}] <a href="${s.url}" target="_blank">${s.title || s.url}</a></li>`)
     .join("");
   reportEl.innerHTML = `
-    <div class="confidence">✅ Verifier confidence: <strong>${pct}%</strong> · 💸 Total spent: <strong>${r.totalSpent} tUSDC</strong></div>
+    <div class="confidence">✅ Verifier confidence: <strong>${pct}%</strong> · 💸 Total spent: <strong>${r.totalSpent} USDC</strong></div>
     <div>${renderMarkdown(r.report || "")}</div>
     ${sources ? `<h3>Sources</h3><ul>${sources}</ul>` : ""}`;
 }

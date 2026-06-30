@@ -80,7 +80,7 @@ export class SimulatedRail implements PaymentRail {
     phase('clear');
     await sleep(250);
 
-    return { orderId, result };
+    return { orderId, result, price };
   }
 
   async shutdown(): Promise<void> {

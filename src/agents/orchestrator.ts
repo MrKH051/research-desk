@@ -70,7 +70,8 @@ export async function runResearch(rail: PaymentRail, query: string): Promise<Fin
     });
     const verified = r3.result as VerifierOutput;
 
-    const totalSpent = PRICE.research + PRICE.writer + PRICE.verifier;
+    // Sum the actual amounts paid (real on-chain prices in `croo` mode).
+    const totalSpent = Math.round((r1.price + r2.price + r3.price) * 1e6) / 1e6;
 
     const final: FinalReport = {
       runId,
