@@ -167,7 +167,13 @@ queryInput.addEventListener("keydown", (e) => {
 fetch("/api/status")
   .then((r) => r.json())
   .then((s) => {
-    document.getElementById("railBadge").textContent = `rail: ${s.rail}`;
-    document.getElementById("llmBadge").textContent = `brain: ${s.llm}`;
+    const railBadge = document.getElementById("railBadge");
+    if (s.rail === "croo") {
+      railBadge.textContent = "⛓ LIVE on Base";
+      railBadge.classList.add("live");
+    } else {
+      railBadge.textContent = "🧪 Simulation";
+    }
+    document.getElementById("llmBadge").textContent = `🧠 ${s.llm}`;
   })
   .catch(() => {});

@@ -69,6 +69,12 @@ body {
   font-family: "Consolas", monospace;
 }
 
+.badge.live {
+  color: var(--green);
+  border-color: var(--green);
+  box-shadow: 0 0 12px rgba(70, 211, 154, 0.35);
+}
+
 .ask {
   display: flex;
   gap: 12px;
