@@ -19,7 +19,7 @@ Research Desk is built around exactly that idea: it's a small, working **agent-t
                 ┌──────────────────────────┐
    you  ───────▶│      Orchestrator        │  (the buyer / consumer agent)
                 └────────────┬─────────────┘
-                             │  hires & pays via escrow (test-USDC)
+                             │  hires & pays via on-chain escrow (USDC)
           ┌──────────────────┼───────────────────┐
           ▼                  ▼                    ▼
    ┌────────────┐     ┌────────────┐       ┌────────────┐
@@ -39,7 +39,7 @@ Everything runs behind one `PaymentRail` interface, so the agents don't care how
 | Rail (`RAIL` env var) | What it does | When to use |
 | --- | --- | --- |
 | `sim` *(default)* | Faithful **offline** simulation of the escrow lifecycle. No accounts needed. | First run, local development, a reliable demo fallback. |
-| `croo` | The **real CROO Agent Protocol on Base** — real test-USDC escrow via `@croo-network/sdk`. | The live hackathon demo. |
+| `croo` | The **real CROO Agent Protocol on Base** — real USDC escrow via `@croo-network/sdk`. | The live hackathon demo. |
 
 Switching is a one-line change in `.env`. Same code, same dashboard, real settlement.
 
@@ -60,11 +60,16 @@ npm start
 ```
 
 It runs out of the box in `sim` mode with a built-in offline "demo brain".
-For real AI output, add a **free** Groq key to `.env`:
+For real AI output, point it at any OpenAI-compatible LLM. The easiest free,
+no-key option that works anywhere is a **local model via [Ollama](https://ollama.com)**:
 
 ```env
-LLM_API_KEY=your_free_groq_key   # from https://console.groq.com/keys
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_MODEL=qwen2.5:7b-instruct
+LLM_API_KEY=ollama
 ```
+
+Any hosted OpenAI-compatible API (e.g. Groq) works too — just change the URL, model, and key.
 
 To run against the real CROO network, set `RAIL=croo` and fill in the CROO keys in `.env`.
 
@@ -74,7 +79,7 @@ To run against the real CROO network, set `RAIL=croo` and fill in the CROO keys 
 
 - **TypeScript + Node.js** (run directly with `tsx`, no build step)
 - **Express** + **Server-Sent Events** for the real-time dashboard
-- **OpenAI-compatible LLM** (Groq by default — free & fast)
+- **OpenAI-compatible LLM** (local Ollama by default; any hosted provider works)
 - **CROO Agent Protocol SDK** (`@croo-network/sdk`) for on-chain escrow on Base
 - Free, no-key **web search** (DuckDuckGo) for real sources
 
