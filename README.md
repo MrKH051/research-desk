@@ -7,6 +7,11 @@ You ask one question. A single **orchestrator agent** then autonomously **hires 
 three specialist agents a **Researcher**, a **Writer**, and a **Verifier** settling each job
 through real on-chain escrow. A live dashboard shows the money moving between agents in real time.
 
+## Demo
+
+▶️ **[Watch the demo video](demo/research-desk-demo.mp4)** — a customer buys Atlas's service on CROO,
+Atlas hires & pays three specialist agents, and every order settles on-chain in real USDC on Base.
+
 ---
 
 ## Why this is different
