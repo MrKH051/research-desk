@@ -19,3 +19,7 @@ Thumbs.db
 
 # Build output
 dist/
+
+# Generated avatar assets (uploaded to CROO dashboard)
+avatars/
+make-avatars.mjs
