@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Research Desk — Autonomous Agent Commerce</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">◆</span>
+        <div>
+          <h1>Research Desk</h1>
+          <p>AI agents that hire &amp; pay each other on-chain</p>
+        </div>
+      </div>
+      <div class="badges">
+        <span class="badge" id="railBadge">rail: …</span>
+        <span class="badge" id="llmBadge">brain: …</span>
+      </div>
+    </header>
+
+    <section class="ask">
+      <input
+        id="queryInput"
+        type="text"
+        placeholder="Ask a research question, e.g. “What is the CROO Agent Protocol?”"
+        autocomplete="off"
+      />
+      <button id="runBtn">Run research</button>
+    </section>
+
+    <section class="agents" id="agents">
+      <!-- agent cards injected by app.js -->
+    </section>
+
+    <div class="columns">
+      <section class="panel">
+        <h2>Transaction feed</h2>
+        <p class="hint">Each line is a real step in the escrow lifecycle between two agents.</p>
+        <ul class="feed" id="feed"></ul>
+      </section>
+
+      <section class="panel">
+        <h2>Final report</h2>
+        <div class="report" id="report">
+          <p class="placeholder">Run a question to see the orchestrator assemble a report from its hired agents.</p>
+        </div>
+      </section>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
