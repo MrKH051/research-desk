@@ -7,48 +7,80 @@
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
     <header class="topbar">
       <div class="brand">
-        <span class="logo">◆</span>
+        <span class="logo" id="logoSlot"></span>
         <div>
-          <h1>Research Desk</h1>
+          <h1>Research&nbsp;Desk</h1>
           <p>AI agents that hire &amp; pay each other on-chain</p>
         </div>
       </div>
       <div class="badges">
-        <span class="badge" id="railBadge">rail: …</span>
-        <span class="badge" id="llmBadge">brain: …</span>
+        <span class="badge" id="railBadge">…</span>
+        <span class="badge" id="llmBadge">…</span>
+        <span class="badge chip-croo">CROO · Base</span>
       </div>
     </header>
 
     <section class="ask">
-      <input
-        id="queryInput"
-        type="text"
-        placeholder="Ask a research question, e.g. “What is the CROO Agent Protocol?”"
-        autocomplete="off"
-      />
-      <button id="runBtn">Run research</button>
+      <div class="ask-inner">
+        <input
+          id="queryInput"
+          type="text"
+          placeholder="Ask a research question — e.g. “What is the CROO Agent Protocol?”"
+          autocomplete="off"
+        />
+        <button id="runBtn"><span>Run research</span></button>
+      </div>
     </section>
 
-    <section class="agents" id="agents">
-      <!-- agent cards injected by app.js -->
+    <section class="stats" id="stats">
+      <div class="stat"><div class="stat-val" id="statSpent">—</div><div class="stat-key">USDC spent</div></div>
+      <div class="stat"><div class="stat-val" id="statConf">—</div><div class="stat-key">Confidence</div></div>
+      <div class="stat"><div class="stat-val" id="statTx">0</div><div class="stat-key">On-chain txns</div></div>
+      <div class="stat"><div class="stat-val" id="statSources">—</div><div class="stat-key">Sources cited</div></div>
+    </section>
+
+    <section class="network" id="network">
+      <!-- Tier 1: the customer -->
+      <div class="tier tier-top">
+        <div class="node node-client" id="node-client" data-node="client"></div>
+      </div>
+      <div class="link-rail"><span class="link-dot"></span></div>
+
+      <!-- Tier 2: the orchestrator -->
+      <div class="tier tier-mid">
+        <div class="node node-hub" id="node-orchestrator" data-node="orchestrator"></div>
+      </div>
+      <div class="link-rail link-fan"><span></span><span></span><span></span></div>
+
+      <!-- Tier 3: the specialists -->
+      <div class="tier tier-bottom">
+        <div class="node" id="node-research" data-node="research"></div>
+        <div class="node" id="node-writer" data-node="writer"></div>
+        <div class="node" id="node-verifier" data-node="verifier"></div>
+      </div>
     </section>
 
     <div class="columns">
       <section class="panel">
-        <h2>Transaction feed</h2>
-        <p class="hint">Each line is a real step in the escrow lifecycle between two agents.</p>
+        <div class="panel-head"><h2>Live transaction feed</h2><span class="pulse-dot"></span></div>
+        <p class="hint">Every line is a real step of the on-chain escrow lifecycle between two agents.</p>
         <ul class="feed" id="feed"></ul>
       </section>
 
       <section class="panel">
-        <h2>Final report</h2>
+        <div class="panel-head"><h2>Final report</h2></div>
         <div class="report" id="report">
-          <p class="placeholder">Run a question to see the orchestrator assemble a report from its hired agents.</p>
+          <p class="placeholder">Ask a question to watch the orchestrator assemble a cited report from the agents it hires.</p>
         </div>
       </section>
     </div>
+
+    <div class="coin-layer" id="coinLayer"></div>
 
     <script src="/app.js"></script>
   </body>
