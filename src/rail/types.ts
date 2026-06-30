@@ -35,4 +35,12 @@ export interface PaymentRail {
   balanceOf(agent: AgentName): number;
   hire(req: HireRequest): Promise<HireResult>;
   shutdown(): Promise<void>;
+
+  /**
+   * Optional: let the orchestrator itself act as a SELLER. When an external buyer
+   * pays for the orchestrator's own service, `handler(input)` is run to produce the
+   * deliverable (it internally hires the worker agents). Only the live CROO rail
+   * uses this; the simulated rail can leave it unimplemented.
+   */
+  setSelfService?(handler: ProviderHandler): void;
 }

@@ -45,8 +45,15 @@ export class CrooRail implements PaymentRail {
 
   private balances = new Map<AgentName, number>();
 
+  // When set, Atlas also acts as a SELLER: it fulfils its own service by orchestrating.
+  private selfServiceHandler?: ProviderHandler;
+
   registerProvider(agent: AgentName, capability: string, handler: ProviderHandler): void {
     this.handlerByAgent.set(agent, { capability, handler });
+  }
+
+  setSelfService(handler: ProviderHandler): void {
+    this.selfServiceHandler = handler;
   }
 
   balanceOf(agent: AgentName): number {
@@ -70,6 +77,11 @@ export class CrooRail implements PaymentRail {
     this.buyer = new AgentClient(cfg, config.croo.orchestratorKey);
     this.buyerStream = await this.buyer.connectWebSocket();
     this.attachBuyerHandlers();
+
+    // ---- Atlas as SELLER (optional two-tier A2A) ----
+    if (config.croo.orchestratorServiceId && this.selfServiceHandler) {
+      this.attachSelfServiceHandlers();
+    }
 
     // ---- Providers: Argus / Calliope / Themis ----
     const workers: WorkerName[] = ['research', 'writer', 'verifier'];
@@ -142,6 +154,65 @@ export class CrooRail implements PaymentRail {
     this.buyerStream.on(EventType.OrderRejected, (e: any) => {
       const pending = e.order_id ? this.pendingByOrder.get(e.order_id) : undefined;
       if (pending) this.fail(pending, new Error(`Order rejected: ${e.reason ?? 'unknown'}`));
+    });
+  }
+
+  /**
+   * Atlas as a SELLER: when an external buyer pays for Atlas's own service,
+   * Atlas fulfils it by orchestrating the three worker agents, then delivers
+   * the composed report back to that buyer. This makes Atlas both buyer and seller.
+   */
+  private attachSelfServiceHandlers(): void {
+    const { EventType, DeliverableType } = this.sdk;
+    const serviceId = config.croo.orchestratorServiceId;
+    const feed = (orderId: string, phase: string, amount: number) =>
+      emit({
+        type: 'order',
+        orderId,
+        from: 'client',
+        to: 'orchestrator',
+        capability: 'research.report',
+        amount,
+        phase,
+      });
+
+    // Auto-accept incoming negotiations for Atlas's own service.
+    this.buyerStream.on(EventType.NegotiationCreated, async (e: any) => {
+      if (e.service_id && e.service_id !== serviceId) return;
+      try {
+        feed('', 'negotiate', 0);
+        await this.buyer.acceptNegotiation(e.negotiation_id);
+      } catch (err) {
+        emit({ type: 'log', level: 'error', message: `Atlas accept failed: ${String(err)}` });
+      }
+    });
+
+    // When the buyer pays, fulfil the order by orchestrating the workers.
+    this.buyerStream.on(EventType.OrderPaid, async (e: any) => {
+      const orderId = e.order_id;
+      try {
+        const order = await this.buyer.getOrder(orderId);
+        if (order?.serviceId && order.serviceId !== serviceId) return; // not our service
+        const price = formatUsdc(order?.price) ?? 0;
+        const input = safeParse(order?.requirements);
+
+        feed(orderId, 'accept', price);
+        feed(orderId, 'lock', price);
+        emit({ type: 'agent', agent: 'orchestrator', state: 'working' });
+
+        const result = await this.selfServiceHandler!(input);
+
+        emit({ type: 'agent', agent: 'orchestrator', state: 'idle' });
+        await this.buyer.deliverOrder(orderId, {
+          deliverableType: DeliverableType.Text,
+          deliverableText: JSON.stringify(result),
+        });
+        feed(orderId, 'deliver', price);
+        feed(orderId, 'clear', price);
+      } catch (err) {
+        emit({ type: 'agent', agent: 'orchestrator', state: 'idle' });
+        emit({ type: 'log', level: 'error', message: `Atlas fulfil failed: ${String(err)}` });
+      }
     });
   }
 

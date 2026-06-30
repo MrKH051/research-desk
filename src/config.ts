@@ -37,6 +37,8 @@ export const config = {
 
     // One SDK key per agent (each agent is a separate profile in the CROO dashboard).
     orchestratorKey: process.env.CROO_ORCHESTRATOR_SDK_KEY ?? '',
+    // Atlas's own service id — set this to also act as a SELLER (two-tier A2A).
+    orchestratorServiceId: process.env.CROO_ORCHESTRATOR_SERVICE_ID ?? '',
     workerKeys: {
       research: process.env.CROO_RESEARCH_SDK_KEY ?? '',
       writer: process.env.CROO_WRITER_SDK_KEY ?? '',

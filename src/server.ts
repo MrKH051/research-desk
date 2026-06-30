@@ -25,6 +25,17 @@ async function buildRail(): Promise<PaymentRail> {
   rail.registerProvider('writer', 'writing.report', writerHandler);
   rail.registerProvider('verifier', 'verify.factcheck', verifierHandler);
 
+  // Let Atlas also be a SELLER: fulfil its own "Research Report" service by orchestrating.
+  rail.setSelfService?.(async (input) => {
+    const query =
+      typeof input === 'string'
+        ? input
+        : ((input as Record<string, unknown>)?.query ??
+            (input as Record<string, unknown>)?.topic ??
+            JSON.stringify(input));
+    return runResearch(rail, String(query));
+  });
+
   await rail.init();
   return rail;
 }

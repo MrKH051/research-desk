@@ -52,10 +52,16 @@ function flashPaid(agent) {
 }
 
 // ---- Transaction feed ----
+function nameOf(id) {
+  if (AGENTS[id]) return AGENTS[id].name;
+  if (id === "client") return "Customer (you)";
+  return id;
+}
+
 function addFeed(order) {
   const { from, to, phase, amount, capability, txHash } = order;
-  const fromName = AGENTS[from]?.name ?? from;
-  const toName = AGENTS[to]?.name ?? to;
+  const fromName = nameOf(from);
+  const toName = nameOf(to);
   const tx = txHash
     ? `<a class="tx-link" href="https://basescan.org/tx/${txHash}" target="_blank" title="${txHash}">⛓ tx</a>`
     : "";
@@ -67,6 +73,7 @@ function addFeed(order) {
     ${tx}
     <span class="tx-amount">${amount} tUSDC</span>`;
   feedEl.prepend(li);
+  while (feedEl.children.length > 60) feedEl.removeChild(feedEl.lastChild);
   if (phase === "clear") flashPaid(to);
 }
 
@@ -119,7 +126,8 @@ es.onmessage = (msg) => {
       break;
     case "run":
       if (ev.phase === "start") {
-        feedEl.innerHTML = "";
+        // Note: we intentionally do NOT clear the feed here, so an incoming
+        // "Customer → Atlas" order stays visible while Atlas sub-contracts.
         reportEl.innerHTML = `<p class="placeholder">🧭 Orchestrator is hiring agents for: “${ev.query}” …</p>`;
       } else if (ev.phase === "done") {
         showReport(ev.report);
