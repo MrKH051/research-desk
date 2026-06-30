@@ -45,6 +45,9 @@ export class CrooRail implements PaymentRail {
 
   private balances = new Map<AgentName, number>();
 
+  // Real per-service prices (USDC), loaded once so every feed line shows the true amount.
+  private servicePrices = new Map<string, number>();
+
   // When set, Atlas also acts as a SELLER: it fulfils its own service by orchestrating.
   private selfServiceHandler?: ProviderHandler;
 
@@ -97,12 +100,47 @@ export class CrooRail implements PaymentRail {
       this.providerStreams.push(stream);
     }
 
+    // Load real service prices once (so the dashboard shows true amounts everywhere).
+    await this.loadServicePrices();
+
     // Seed dashboard balances (display only; real funds live on-chain).
     this.balances.set('orchestrator', config.croo.startBalance);
     for (const w of workers) this.balances.set(w, 0);
     for (const [agent, balance] of this.balances) emit({ type: 'balance', agent, balance });
 
     emit({ type: 'log', level: 'info', message: 'Connected to CROO Agent Protocol on Base.' });
+  }
+
+  /** Fetch the real USDC price of each of our services from the public store (once). */
+  private async loadServicePrices(): Promise<void> {
+    const wanted = new Set(
+      [
+        config.croo.serviceIds.research,
+        config.croo.serviceIds.writer,
+        config.croo.serviceIds.verifier,
+        config.croo.orchestratorServiceId,
+      ].filter(Boolean),
+    );
+    if (wanted.size === 0) return;
+    try {
+      for (let page = 1; page <= 8 && this.servicePrices.size < wanted.size; page++) {
+        const res = await fetch(
+          `${config.croo.apiUrl}/backend/v1/public/services?page=${page}&page_size=100`,
+          { headers: { 'X-SDK-Key': config.croo.orchestratorKey } },
+        );
+        if (!res.ok) break;
+        const data = (await res.json()) as { items?: Array<{ serviceId: string; price: string }> };
+        const items = data.items ?? [];
+        if (items.length === 0) break;
+        for (const it of items) {
+          if (wanted.has(it.serviceId)) {
+            this.servicePrices.set(it.serviceId, formatUsdc(it.price) ?? 0);
+          }
+        }
+      }
+    } catch {
+      /* fall back to placeholder prices if the store is unreachable */
+    }
   }
 
   /** Buyer side: pay when the order is created, collect when it completes. */
@@ -180,7 +218,7 @@ export class CrooRail implements PaymentRail {
     this.buyerStream.on(EventType.NegotiationCreated, async (e: any) => {
       if (e.service_id && e.service_id !== serviceId) return;
       try {
-        feed('', 'negotiate', 0);
+        feed('', 'negotiate', this.servicePrices.get(serviceId) ?? 0);
         await this.buyer.acceptNegotiation(e.negotiation_id);
       } catch (err) {
         emit({ type: 'log', level: 'error', message: `Atlas accept failed: ${String(err)}` });
@@ -269,7 +307,7 @@ export class CrooRail implements PaymentRail {
       const pending: Pending = {
         to,
         capability,
-        price,
+        price: this.servicePrices.get(serviceId) ?? price,
         resolve: (r) => {
           clearTimeout(timer);
           resolve(r);
